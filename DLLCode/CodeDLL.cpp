@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
+#include <stdio.h>
 #include <malloc.h>
 #include <time.h>
 
@@ -34,8 +35,8 @@ extern __declspec(dllimport) int Count(int*);
 int Count(int* n)
 {
 	arr = calloc(2, sizeof(int));
-	
-	EnterCriticalSection(&section);
+	InitializeCriticalSection(&section);
+	EnterCriticalSection(&section);	
 	for (n[0]; n[0] <= n[1]; n[0]++)
 	{
 		
@@ -46,16 +47,13 @@ int Count(int* n)
 			else k += 0;
 		}
 		if (k == 0) result++;
-		else result += 0;
-		
+		else result += 0;		
 	}	
-	
-	
+	LeaveCriticalSection(&section);
 	if (threads != NULL)
 	{
 		for (int i = 0; i < countThread; i++)
-		{
-			LeaveCriticalSection(&section);
+		{			
 			ExitThread(0);
 		}
 	}
@@ -76,15 +74,15 @@ int Threads(int* n, int countTreads)
 	threads = calloc(countTreads, sizeof(HANDLE));
 	countThread = countTreads;
 	DWORD lpThreadId;
-	InitializeCriticalSection(&section);
 	for (int i = 0; i < countThread; i++)
 	{
 		
 		threads[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Count, n, 0, &lpThreadId);
 	}
 	WaitForMultipleObjects(1, threads, TRUE, INFINITE);
-	DeleteCriticalSection(&section);
 
+	DeleteCriticalSection(&section);
+	
 	arr[0] = result;
 	arr[1] = clock();
 
